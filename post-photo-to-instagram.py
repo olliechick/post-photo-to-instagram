@@ -37,6 +37,8 @@ def main():
         if bot.api.last_response.status_code != 200:
             print(bot.api.last_response)
 
+        os.remove(IMAGE_FILENAME + ".REMOVE_ME")
+
     except Exception as e:
         print(str(e))
 
