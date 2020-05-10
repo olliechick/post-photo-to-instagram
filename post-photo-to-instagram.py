@@ -11,7 +11,7 @@ IMAGE_FILENAME = "image.jpg"
 def main():
     sys.path.append(os.path.join(sys.path[0], "../../"))
 
-    link = input("Enter image URL: ")
+    link = os.environ['input_url']
     f = requests.get(link)
     image_url, caption = f.text.split('\n')
 
