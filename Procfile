@@ -1,1 +1,0 @@
-release: ./release-tasks.sh
