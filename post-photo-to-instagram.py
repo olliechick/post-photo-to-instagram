@@ -28,7 +28,7 @@ def main():
             print(f"Errors while downloading image': {e1}, {e2}")
 
     bot = Bot()
-    bot.login()
+    bot.login(username=os.environ['ig_username'], password=os.environ['ig_password'])
 
     pic = IMAGE_FILENAME
 
