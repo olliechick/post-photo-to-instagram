@@ -13,7 +13,9 @@ def main():
 
     link = os.environ['input_url']
     f = requests.get(link)
-    image_url, caption = f.text.split('\n')
+    output = f.text.split('\n')
+    image_url = output[0]
+    caption = '\n'.join(output[1:])
 
     # Download today's image
 
