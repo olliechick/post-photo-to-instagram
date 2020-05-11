@@ -6,7 +6,7 @@ def main():
     print(os.environ)
     username = os.environ['ig_username']
     password = os.environ['ig_password']
-    output = '\n'.join([username, password, 'n'])
+    output = '\n'.join([username, password, 'n', '1'])
     write_to_file('in.txt', output)
 
 
