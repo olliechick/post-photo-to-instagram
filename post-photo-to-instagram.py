@@ -1,6 +1,8 @@
+import csv
 import os
-import sys
+import random
 import urllib.request
+from datetime import date
 
 import requests
 from instabot import Bot
@@ -9,16 +11,15 @@ IMAGE_FILENAME = "image.jpg"
 
 
 def main():
-    sys.path.append(os.path.join(sys.path[0], "../../"))
 
-    link = os.environ['input_url']
-    f = requests.get(link)
-    output = f.text.split('\n')
-    image_url = output[0]
-    caption = '\n'.join(output[1:])
+    # Get image URL
+    posts = csv.reader(requests.get(os.environ['input_url']).text.splitlines())
+    random.seed(date.today())
+    i = random.randrange(len(posts))
+    filename, caption = posts[i]
+    image_url = os.environ['image_host'] + filename
 
-    # Download today's image
-
+    # Download image
     try:
         urllib.request.urlretrieve(image_url, IMAGE_FILENAME)
     except Exception as e1:
@@ -33,7 +34,7 @@ def main():
     pic = IMAGE_FILENAME
 
     try:
-        print("Uploading " + caption)
+        print("Uploading post with caption: " + caption)
 
         bot.upload_photo(pic, caption=caption)
         if bot.api.last_response.status_code != 200:
