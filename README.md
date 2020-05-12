@@ -29,5 +29,5 @@ In the examples given, there is an image at https://olliechick.co.nz/ig_media/im
 ### Running
 
 When run, the program will post a random photo from those listed in the CSV file.
-The seed for the randomness is the current day, so running this multiple times in the same day will result in the same image posted.
-Also note that the random number generated is an independent event - don't fall victim to the [Gambler's fallacy](https://en.wikipedia.org/wiki/Gambler%27s_fallacy).
+
+Note that the random number generated is an independent event - don't fall victim to the [Gambler's fallacy](https://en.wikipedia.org/wiki/Gambler%27s_fallacy).
