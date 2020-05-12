@@ -36,7 +36,7 @@ def get_random_post(posts):
 def upload_media(bot, filename, caption):
     extension = get_extension(filename)
     if extension in IMAGE_EXTENSIONS:
-        bot.upload_photo(filename, caption=caption)
+        bot.upload_photo(filename, caption=caption, options={"rename": False})
         if bot.api.last_response.status_code != 200:
             print(bot.api.last_response)
     elif extension in VIDEO_EXTENSIONS:
@@ -79,7 +79,6 @@ def main():
         print("Uploading post with caption: " + caption)
         upload_media(bot, placeholder_filename, caption)
         os.remove(placeholder_filename)
-        os.remove(placeholder_filename + ".REMOVE_ME")
     except Exception as e:
         print(str(e))
 
