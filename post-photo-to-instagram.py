@@ -2,7 +2,6 @@ import csv
 import os
 import random
 import urllib.request
-from datetime import date
 
 import requests
 from instabot import Bot
@@ -17,7 +16,10 @@ def get_extension(filename):
 
 
 def get_posts():
-    reader = csv.reader(requests.get(os.environ['input_url']).text.splitlines())
+    request = requests.get(os.environ['input_url'])
+    if 'input_url_encoding' in os.environ:
+        request.encoding = os.environ['input_url_encoding']
+    reader = csv.reader(request.text.splitlines())
     posts = []
     for post in reader:
         if len(post) > 0:
@@ -48,7 +50,7 @@ def upload_media(bot, filename, caption):
             ):
                 bot.logger.error("Something went wrong...")
                 return
-            bot.logger.info("Succesfully uploaded: " + filename)
+            bot.logger.info("Successfully uploaded: " + filename)
             return
         except Exception as e:
             bot.logger.error("\033[41mERROR...\033[0m")
