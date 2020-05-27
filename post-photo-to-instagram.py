@@ -10,15 +10,21 @@ PLACEHOLDER = "placeholder"
 IMAGE_EXTENSIONS = ["jpg", "jpeg", "png"]
 VIDEO_EXTENSIONS = ["mp4", "mov"]
 
+ENV_USERNAME = 'ig_username'
+ENV_PASSWORD = 'ig_password'
+ENV_INPUT_URL = 'input_url'
+ENC_INPUT_URL_ENCODING = 'input_url_encoding'
+ENV_IMAGE_HOST = 'image_host'
+
 
 def get_extension(filename):
     return filename.split('.')[-1]
 
 
 def get_posts():
-    request = requests.get(os.environ['input_url'])
-    if 'input_url_encoding' in os.environ:
-        request.encoding = os.environ['input_url_encoding']
+    request = requests.get(os.environ[ENV_INPUT_URL])
+    if ENC_INPUT_URL_ENCODING in os.environ:
+        request.encoding = os.environ[ENC_INPUT_URL_ENCODING]
     reader = csv.reader(request.text.splitlines())
     posts = []
     for post in reader:
@@ -30,7 +36,7 @@ def get_posts():
 def get_random_post(posts):
     i = random.randrange(len(posts))
     filename, caption = posts[i]
-    media_url = os.environ['image_host'] + filename
+    media_url = os.environ[ENV_IMAGE_HOST] + filename
     placeholder_filename = f"{PLACEHOLDER}.{get_extension(filename)}"
     return media_url, placeholder_filename, caption
 
@@ -74,7 +80,7 @@ def main():
 
     # Set up Instabot
     bot = Bot()
-    bot.login(username=os.environ['ig_username'], password=os.environ['ig_password'])
+    bot.login(username=os.environ[ENV_USERNAME], password=os.environ[ENV_PASSWORD])
 
     # Upload media
     try:
