@@ -29,6 +29,10 @@ Create the following environment variables:
 
 In the examples given, there is an image at https://olliechick.co.nz/ig_media/image1.jpg, which will be posted with the caption "My caption".
 
+#### Sentry
+
+If you have connected [Sentry](https://docs.sentry.io/) to the application, this will receive any exceptions raised. The environment variable `SENTRY_DSN` should be set to the DSN provided by Sentry.
+
 ### Running
 
 When run, the program will post a random photo from those listed in the CSV file.

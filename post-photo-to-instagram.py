@@ -4,6 +4,7 @@ import random
 import urllib.request
 
 import requests
+import sentry_sdk
 from instabot import Bot
 
 PLACEHOLDER = "placeholder"
@@ -15,6 +16,7 @@ ENV_PASSWORD = 'ig_password'
 ENV_INPUT_URL = 'input_url'
 ENC_INPUT_URL_ENCODING = 'input_url_encoding'
 ENV_IMAGE_HOST = 'image_host'
+ENV_SENTRY_DSN = 'SENTRY_DSN'
 
 
 def get_extension(filename):
@@ -47,25 +49,24 @@ def upload_media(bot, filename, caption):
         bot.upload_photo(filename, caption=caption, options={"rename": False})
         if bot.api.last_response.status_code != 200:
             print(bot.api.last_response)
+            raise Exception("Post not posted")
     elif extension in VIDEO_EXTENSIONS:
-        try:
-            bot.logger.info("Checking {}".format(filename))
-            if not bot.upload_video(
-                    os.path.join(os.path.dirname(os.path.realpath(__file__)), filename),
-                    caption=caption, options={"rename": False}
-            ):
-                bot.logger.error("Something went wrong...")
-                return
-            bot.logger.info("Successfully uploaded: " + filename)
-            return
-        except Exception as e:
-            bot.logger.error("\033[41mERROR...\033[0m")
-            bot.logger.error(str(e))
+        bot.logger.info("Checking {}".format(filename))
+        if not bot.upload_video(
+                os.path.join(os.path.dirname(os.path.realpath(__file__)), filename),
+                caption=caption, options={"rename": False}
+        ):
+            raise Exception("Something went wrong when uploading the video: " + filename)
+        bot.logger.info("Successfully uploaded: " + filename)
+        return
     else:
-        print(f"Error: {extension} not supported.")
+        raise Exception(f"Error: {extension} not supported.")
 
 
 def main():
+    if ENV_SENTRY_DSN in os.environ:
+        sentry_sdk.init(os.environ[ENV_SENTRY_DSN])
+
     posts = get_posts()
     media_url, placeholder_filename, caption = get_random_post(posts)
 
@@ -76,19 +77,16 @@ def main():
         try:
             urllib.request.urlretrieve(media_url, placeholder_filename)
         except Exception as e2:
-            print(f"Errors while downloading image': {e1}, {e2}")
+            raise Exception(f"Errors while downloading image': {e1}, {e2}")
 
     # Set up Instabot
     bot = Bot()
     bot.login(username=os.environ[ENV_USERNAME], password=os.environ[ENV_PASSWORD])
 
     # Upload media
-    try:
-        print("Uploading post with caption: " + caption)
-        upload_media(bot, placeholder_filename, caption)
-        os.remove(placeholder_filename)
-    except Exception as e:
-        print(str(e))
+    print("Uploading post with caption: " + caption)
+    upload_media(bot, placeholder_filename, caption)
+    os.remove(placeholder_filename)
 
 
 if __name__ == '__main__':
