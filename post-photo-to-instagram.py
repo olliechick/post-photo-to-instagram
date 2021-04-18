@@ -31,7 +31,6 @@ def excel_date_to_datetime(excel_date):
 
 
 def get_posts():
-    print(os.environ[ENV_INPUT_URL])
     request = requests.get(os.environ[ENV_INPUT_URL])
     if ENC_INPUT_URL_ENCODING in os.environ:
         request.encoding = os.environ[ENC_INPUT_URL_ENCODING]
@@ -103,7 +102,7 @@ def main():
         try:
             urllib.request.urlretrieve(media_url, placeholder_filename)
         except Exception as e2:
-            raise Exception(f"Errors while downloading image': {e1}, {e2}")
+            raise Exception(f"Errors while downloading image from {media_url}: {e1}, {e2}")
 
     # Set up Instabot
     bot = Bot()
