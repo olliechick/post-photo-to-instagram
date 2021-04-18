@@ -2,7 +2,7 @@ import csv
 import os
 import random
 import urllib.request
-
+from datetime import datetime, timedelta
 import requests
 import sentry_sdk
 from instabot import Bot
@@ -17,13 +17,21 @@ ENV_INPUT_URL = 'input_url'
 ENC_INPUT_URL_ENCODING = 'input_url_encoding'
 ENV_IMAGE_HOST = 'image_host'
 ENV_SENTRY_DSN = 'SENTRY_DSN'
+ENV_USE_SAME_DATE_IF_POSS = 'same_date'
 
 
 def get_extension(filename):
     return filename.split('.')[-1]
 
 
+def excel_date_to_datetime(excel_date):
+    temp = datetime(1889, 12, 31)
+    delta = timedelta(days=excel_date)
+    return temp + delta
+
+
 def get_posts():
+    print(os.environ[ENV_INPUT_URL])
     request = requests.get(os.environ[ENV_INPUT_URL])
     if ENC_INPUT_URL_ENCODING in os.environ:
         request.encoding = os.environ[ENC_INPUT_URL_ENCODING]
@@ -35,9 +43,26 @@ def get_posts():
     return posts
 
 
-def get_random_post(posts):
+def get_random_post(posts, use_same_date_if_possible):
+    if use_same_date_if_possible:
+        valid_posts = []
+        today = datetime.now()
+        for post in posts:
+            if len(post) > 2:
+                date_str = post[2]
+                date = False
+                if '-' in date_str:
+                    date = datetime.strptime(date_str, '%d-%b-%y')
+                elif date_str:
+                    date = excel_date_to_datetime(float(date_str))
+                if date and date.day == today.day and date.month == today.month:
+                    valid_posts.append(post)
+        if len(valid_posts):
+            posts = valid_posts
     i = random.randrange(len(posts))
-    filename, caption = posts[i]
+    post = posts[i]
+    filename = post[0]
+    caption = post[1]
     media_url = os.environ[ENV_IMAGE_HOST] + filename
     placeholder_filename = f"{PLACEHOLDER}.{get_extension(filename)}"
     return media_url, placeholder_filename, caption
@@ -68,7 +93,8 @@ def main():
         sentry_sdk.init(os.environ[ENV_SENTRY_DSN])
 
     posts = get_posts()
-    media_url, placeholder_filename, caption = get_random_post(posts)
+    use_same_date_if_possible = os.environ[ENV_USE_SAME_DATE_IF_POSS] == 'true'
+    media_url, placeholder_filename, caption = get_random_post(posts, use_same_date_if_possible)
 
     # Download media
     try:

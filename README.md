@@ -9,10 +9,10 @@ Videos can also be posted, but this has not been fully tested so may not work.
 
 Install packages from `requirements.txt`.
 
-Host a CSV file on a website of all the possible photos in the format `filename,caption`, for example:
+Host a CSV file on a website of all the possible photos in the format `filename,caption,date` (although the date is optional), for example:
 
 ```csv
-'image1.jpg','My caption'
+'image1.jpg','My caption','1-Jan-21'
 ```
 
 These images should be hosted on a website with the filenames matching those in the CSV file.
@@ -26,6 +26,7 @@ Create the following environment variables:
 | `input_url`          | URL of CSV file    | `https://olliechick.co.nz/example.csv` |
 | `input_url_encoding` |Encoding of CSV file| `utf-8-sig`                            |
 | `image_host`         | Base URL of images | `https://olliechick.co.nz/ig_media/`   |
+| `same_date`          | Use the same date (if possible) | `true`
 
 In the examples given, there is an image at https://olliechick.co.nz/ig_media/image1.jpg, which will be posted with the caption "My caption".
 
@@ -35,7 +36,7 @@ If you have connected [Sentry](https://docs.sentry.io/) to the application, this
 
 ### Running
 
-When run, the program will post a random photo from those listed in the CSV file.
+When run, the program will post a random photo from those listed in the CSV file. If `same_date` is set to `true`, then it will post a photo from that date if possible.
 
 Instagram may block the login attempt if, for example, you have a new account or you run it from a server hosted in another country to the one that you normally logged in to your account on. The API this runs on recommends you not use your own account.
 
