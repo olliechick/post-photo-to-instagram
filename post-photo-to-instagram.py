@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 import random
 import urllib.request
@@ -11,13 +12,24 @@ PLACEHOLDER = "placeholder"
 IMAGE_EXTENSIONS = ["jpg", "jpeg", "png"]
 VIDEO_EXTENSIONS = ["mp4", "mov"]
 
+ENV_TRUSTIFI_URL = 'TRUSTIFI_URL'
+ENV_TRUSTIFI_KEY = 'TRUSTIFI_KEY'
+ENV_TRUSTIFI_SECRET = 'TRUSTIFI_SECRET'
+ENV_SENTRY_DSN = 'SENTRY_DSN'
+
 ENV_USERNAME = 'ig_username'
 ENV_PASSWORD = 'ig_password'
 ENV_INPUT_URL = 'input_url'
 ENC_INPUT_URL_ENCODING = 'input_url_encoding'
 ENV_IMAGE_HOST = 'image_host'
-ENV_SENTRY_DSN = 'SENTRY_DSN'
-ENV_USE_SAME_DATE_IF_POSS = 'same_date'
+ENV_USE_SAME_DATE = 'same_date'
+ENV_POST_PHOTO_TO_INSTAGRAM_MODE = 'ppti_mode'
+ENV_TO_EMAIL = 'ppti_to_email'
+ENV_TO_NAME = 'ppti_to_name'
+
+MODE_INSTAGRAM = 'instagram'
+MODE_EMAIL = 'email'
+MODE_ALL = 'all'
 
 
 def get_extension(filename):
@@ -92,27 +104,65 @@ def main():
         sentry_sdk.init(os.environ[ENV_SENTRY_DSN])
 
     posts = get_posts()
-    use_same_date_if_possible = os.environ[ENV_USE_SAME_DATE_IF_POSS] == 'true'
+    use_same_date_if_possible = ENV_USE_SAME_DATE in os.environ and os.environ[ENV_USE_SAME_DATE] == 'true'
     media_url, placeholder_filename, caption = get_random_post(posts, use_same_date_if_possible)
-    print("Downloading " + media_url)
 
-    # Download media
-    try:
-        urllib.request.urlretrieve(media_url, placeholder_filename)
-    except Exception as e1:
+    mode = MODE_INSTAGRAM
+    if ENV_POST_PHOTO_TO_INSTAGRAM_MODE in os.environ:
+        mode = os.environ[ENV_POST_PHOTO_TO_INSTAGRAM_MODE]
+
+    if mode == MODE_EMAIL or mode == MODE_ALL:
+        url = os.environ[ENV_TRUSTIFI_URL] + '/api/i/v1/email'
+
+        payload = json.dumps({
+            "recipients": [
+                {
+                    "email": os.environ[ENV_TO_EMAIL],
+                    "name": os.environ[ENV_TO_NAME],
+                }
+            ],
+            "lists": [],
+            "contacts": [],
+            "attachments": [],
+            "title": "Automated Instagram post",
+            "html": f"{caption}<br /><a href=\"{media_url}\">link</a>",
+            "methods": {
+                "postmark": False,
+                "secureSend": False,
+                "encryptContent": False,
+                "secureReply": False
+            },
+            "from": {"name": os.environ[ENV_TO_NAME]}
+        })
+
+        headers = {
+            'x-trustifi-key': os.environ[ENV_TRUSTIFI_KEY],
+            'x-trustifi-secret': os.environ[ENV_TRUSTIFI_SECRET],
+            'Content-Type': 'application/json'
+        }
+
+        response = requests.request('POST', url, headers=headers, data=payload)
+        print(response.json())
+
+    elif mode == MODE_INSTAGRAM or mode == MODE_ALL:
+        # Download media
+        print("Downloading " + media_url)
         try:
             urllib.request.urlretrieve(media_url, placeholder_filename)
-        except Exception as e2:
-            raise Exception(f"Errors while downloading image from {media_url}: {e1}, {e2}")
+        except Exception as e1:
+            try:
+                urllib.request.urlretrieve(media_url, placeholder_filename)
+            except Exception as e2:
+                raise Exception(f"Errors while downloading image from {media_url}: {e1}, {e2}")
 
-    # Set up Instabot
-    bot = Bot()
-    bot.login(username=os.environ[ENV_USERNAME], password=os.environ[ENV_PASSWORD])
+        # Set up Instabot
+        bot = Bot()
+        bot.login(username=os.environ[ENV_USERNAME], password=os.environ[ENV_PASSWORD])
 
-    # Upload media
-    print("Uploading post with caption: " + caption)
-    upload_media(bot, placeholder_filename, caption)
-    os.remove(placeholder_filename)
+        # Upload media
+        print("Uploading post with caption: " + caption)
+        upload_media(bot, placeholder_filename, caption)
+        os.remove(placeholder_filename)
 
 
 if __name__ == '__main__':
