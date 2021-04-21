@@ -94,6 +94,7 @@ def main():
     posts = get_posts()
     use_same_date_if_possible = os.environ[ENV_USE_SAME_DATE_IF_POSS] == 'true'
     media_url, placeholder_filename, caption = get_random_post(posts, use_same_date_if_possible)
+    print("Downloading " + media_url)
 
     # Download media
     try:
