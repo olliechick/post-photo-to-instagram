@@ -144,7 +144,7 @@ def main():
         response = requests.request('POST', url, headers=headers, data=payload)
         print(response.json())
 
-    elif mode == MODE_INSTAGRAM or mode == MODE_ALL:
+    if mode == MODE_INSTAGRAM or mode == MODE_ALL:
         # Download media
         print("Downloading " + media_url)
         try:
