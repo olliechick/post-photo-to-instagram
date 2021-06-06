@@ -2,3 +2,5 @@ requests
 instabot
 moviepy
 sentry-sdk
+sendgrid
+python-dotenv

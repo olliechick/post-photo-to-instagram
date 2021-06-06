@@ -30,6 +30,22 @@ Create the following environment variables:
 
 In the examples given, there is an image at https://olliechick.co.nz/ig_media/image1.jpg, which will be posted with the caption "My caption".
 
+#### Emails
+
+To receive the caption and a link to the image as an email using Twilio, set the following environment variables:
+
+| Environment variable | Description        | Example    |
+|----------------------|--------------------|------------|
+| `ppti_from_name`     | From name          | `Ollie Chick` |
+| `ppti_from_email`    | From email         | `hi@olliechick.co.nz` |
+| `ppti_to_name`       | To name            | `Ollie Chick` |
+| `ppti_to_email`      | To email address   | `olliechick@gmail.com`                            |
+| `ppti_mode`          | Mode (defaults to `'instagram'`) | `email`   |
+
+If the `ppti_mode` is set to `'email'`, it will just send the email.
+If it is set to `'instagram'`, it will post to Instagram.
+If it is set to `'all'`, it will send the email and post to Instagram. 
+
 #### Sentry
 
 If you have connected [Sentry](https://docs.sentry.io/) to the application, this will receive any exceptions raised. The environment variable `SENTRY_DSN` should be set to the DSN provided by Sentry.
